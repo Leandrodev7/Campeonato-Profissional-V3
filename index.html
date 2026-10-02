@@ -1,0 +1,572 @@
+<!doctype html>
+
+<html lang="pt-BR">
+  <head>
+    <meta
+      name="google-site-verification"
+      content="9KKn1xg171yxIhu-cbGI0PEzf_JzWLfIKxdCF5sL-kc"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campeonato Profissional V4</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- =========================  
+           CABEÇALHO PRINCIPAL  
+      ========================== -->
+      <header class="site-header">
+        <div class="brand-area">
+          <div class="brand-icon">🏆</div>
+          <div class="brand-text">
+            <span class="brand-kicker">GESTÃO ESPORTIVA</span>
+            <h1>Campeonato Profissional</h1>
+            <p>Organize, acompanhe e gerencie sua competição.</p>
+          </div>
+        </div>
+
+        <div class="season-panel">
+          <span class="season-label">TEMPORADA</span>
+          <strong id="headerTemporada">2026</strong>
+          <span class="status-active">
+            <span class="status-dot"></span>
+            Sistema ativo
+          </span>
+        </div>
+      </header>
+
+      <!-- =========================  
+       NAVEGAÇÃO  
+  ========================== -->
+      <nav class="main-navigation">
+        <div class="nav-title">
+          <span>MENU</span>
+        </div>
+
+        <div class="tabs">
+          <button
+            class="tab-btn active"
+            onclick="mostrarAba(event, 'dashboard')"
+          >
+            <span class="nav-icon">⌂</span>
+            Dashboard
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'times')">
+            <span class="nav-icon">⚽</span>
+            Times
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'tabela')">
+            <span class="nav-icon">📊</span>
+            Classificação
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'rodadas')">
+            <span class="nav-icon">📅</span>
+            Rodadas & Chaves
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'artilheiros')">
+            <span class="nav-icon">👟</span>
+            Artilheiros
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'temporadas')">
+            <span class="nav-icon">🏆</span>
+            Temporadas
+          </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'backup')">
+            <span class="nav-icon">💾</span>
+            Backup
+          </button>
+        </div>
+      </nav>
+      <button class="tab-btn" onclick="mostrarAba(event, 'contato')">
+        <span class="nav-icon">📞</span>
+        Contato
+      </button>
+
+      <main class="main-content">
+        <!-- =========================  
+         DASHBOARD  
+    ========================== -->
+        <div id="dashboard" class="tab-content active">
+          <section class="dashboard-hero">
+            <div class="hero-copy">
+              <span class="section-eyebrow"> PAINEL PRINCIPAL </span>
+
+              <h2>
+                Tudo sobre o seu
+                <span>campeonato</span>
+                em um só lugar.
+              </h2>
+
+              <p>
+                Acompanhe equipes, partidas, classificação, artilharia e
+                histórico da competição.
+              </p>
+            </div>
+
+            <div class="hero-trophy">
+              <div class="trophy-circle">🏆</div>
+            </div>
+          </section>
+
+          <section class="dashboard-section">
+            <div class="section-heading">
+              <div>
+                <span class="section-eyebrow"> RESUMO DA COMPETIÇÃO </span>
+
+                <h2>Painel do Campeonato</h2>
+              </div>
+
+              <span class="live-badge"> ● ATUALIZADO </span>
+            </div>
+
+            <div class="dashboard-grid">
+              <div class="stat-card stat-featured">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Times</span>
+                  <strong class="stat-val" id="s-times">0</strong>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Jogos</span>
+                  <strong class="stat-val" id="s-jogos">0</strong>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Realizados</span>
+                  <strong class="stat-val" id="s-real">0</strong>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">🥅</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Gols</span>
+                  <strong class="stat-val" id="s-gols">0</strong>
+                </div>
+              </div>
+
+              <div class="stat-card stat-highlight">
+                <div class="stat-icon">👑</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Líder / Atual</span>
+                  <strong class="stat-val" id="s-lider">—</strong>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">👟</div>
+                <div class="stat-info">
+                  <span class="stat-lab">Artilheiro</span>
+                  <strong class="stat-val" id="s-artilheiro">—</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- =========================  
+         TIMES  
+    ========================== -->
+        <div id="times" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow">EQUIPES</span>
+              <h2>Times do Campeonato</h2>
+              <p>Cadastre e acompanhe os clubes participantes.</p>
+            </div>
+          </section>
+
+          <div class="content-grid">
+            <section class="card form-card">
+              <div class="card-heading">
+                <div class="card-icon">⚽</div>
+
+                <div>
+                  <span class="card-kicker">NOVO CADASTRO</span>
+                  <h2>Cadastrar Time</h2>
+                </div>
+              </div>
+
+              <input id="teamName" placeholder="Nome do time" />
+
+              <input id="teamCidade" placeholder="Cidade (opcional)" />
+
+              <button onclick="addTeam()">+ Adicionar Time</button>
+            </section>
+
+            <section class="card teams-card">
+              <div class="card-heading">
+                <div>
+                  <span class="card-kicker">COMPETIÇÃO</span>
+                  <h2>Times</h2>
+                </div>
+
+                <span class="count-badge"> Participantes </span>
+              </div>
+
+              <div class="times-grid" id="timesGrid"></div>
+            </section>
+          </div>
+        </div>
+
+        <!-- =========================  
+         PERFIL DO TIME  
+    ========================== -->
+        <div id="perfilTime" class="tab-content">
+          <section class="card profile-card">
+            <button class="link" onclick="mostrarAba(event, 'times')">
+              ← Voltar aos Times
+            </button>
+
+            <div id="conteudoPerfil"></div>
+          </section>
+        </div>
+
+        <!-- =========================  
+         CLASSIFICAÇÃO  
+    ========================== -->
+        <div id="tabela" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> TABELA </span>
+
+              <h2>Classificação</h2>
+
+              <p>Acompanhe a situação das equipes na competição.</p>
+            </div>
+
+            <div class="table-badge">📊 Ranking</div>
+          </section>
+
+          <div id="conteudoTabelas"></div>
+        </div>
+
+        <!-- =========================  
+         RODADAS E CHAVES  
+    ========================== -->
+        <div id="rodadas" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> COMPETIÇÃO </span>
+
+              <h2>Rodadas & Chaves</h2>
+
+              <p>Configure e acompanhe o calendário do campeonato.</p>
+            </div>
+          </section>
+
+          <section class="card calendar-card">
+            <div class="calendar-header">
+              <div>
+                <span class="card-kicker"> CALENDÁRIO </span>
+
+                <h2>
+                  Temporada:
+                  <span id="nomeTemporadaAtual"> 2026 </span>
+                </h2>
+              </div>
+
+              <div class="calendar-icon">📅</div>
+            </div>
+
+            <div class="config-box">
+              <div class="config-item">
+                <label> Formato do Campeonato </label>
+
+                <select
+                  id="formatoCampeonato"
+                  onchange="alternarVisibilidadeFormatos()"
+                >
+                  <option value="PONTOS_CORRIDOS">
+                    Pontos Corridos (ex: Brasileirão)
+                  </option>
+
+                  <option value="MATA_MATA">
+                    Mata-Mata (ex: Copa do Brasil)
+                  </option>
+
+                  <option value="MISTO">
+                    Misto - Grupos + Mata-Mata (ex: Libertadores)
+                  </option>
+                </select>
+              </div>
+
+              <div id="boxTurnos" class="config-item">
+                <label> Turnos (Pontos Corridos) </label>
+
+                <select id="opcaoTurnos">
+                  <option value="2">Ida e Volta</option>
+
+                  <option value="1">Turno Único</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button onclick="gerarCampeonatoCompleto()">
+                🚀 Iniciar Torneio
+              </button>
+
+              <button class="gold" onclick="encerrarTemporada()">
+                🏁 Encerrar Temporada
+              </button>
+
+              <button class="del" onclick="comecarNovo()">
+                Novo Campeonato
+              </button>
+            </div>
+
+            <div id="listaRodadas" class="rounds-container"></div>
+          </section>
+        </div>
+
+        <!-- =========================  
+         ARTILHEIROS  
+    ========================== -->
+        <div id="artilheiros" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> ESTATÍSTICAS </span>
+
+              <h2>Artilharia</h2>
+
+              <p>Cadastre jogadores e acompanhe os goleadores.</p>
+            </div>
+
+            <div class="table-badge">👟 Goleadores</div>
+          </section>
+
+          <div class="content-grid">
+            <section class="card form-card">
+              <div class="card-heading">
+                <div class="card-icon">👟</div>
+
+                <div>
+                  <span class="card-kicker"> NOVO JOGADOR </span>
+
+                  <h2>Cadastrar Jogador</h2>
+                </div>
+              </div>
+
+              <input id="jogadorNome" placeholder="Nome do jogador" />
+
+              <input
+                id="jogadorGols"
+                type="number"
+                min="0"
+                placeholder="Gols"
+              />
+
+              <select id="jogadorTime">
+                <option value="">-- Time --</option>
+              </select>
+
+              <button onclick="addJogador()">Salvar Jogador</button>
+            </section>
+
+            <section class="card">
+              <div class="card-heading">
+                <div>
+                  <span class="card-kicker"> RANKING </span>
+
+                  <h2>Ranking de Artilharia</h2>
+                </div>
+
+                <div class="card-icon">🥇</div>
+              </div>
+
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Jogador</th>
+                      <th>Time</th>
+                      <th>Gols</th>
+                      <th>Ação</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="rankingArtilheiros"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- =========================  
+         TEMPORADAS  
+    ========================== -->
+        <div id="temporadas" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> HISTÓRICO </span>
+
+              <h2>Temporadas</h2>
+
+              <p>Consulte o histórico das competições encerradas.</p>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-heading">
+              <div class="card-icon">🏆</div>
+
+              <div>
+                <span class="card-kicker"> TEMPORADA ATUAL </span>
+
+                <h2>Histórico de Temporadas</h2>
+              </div>
+            </div>
+
+            <p class="season-current">
+              Temporada atual:
+              <strong id="atualTemporada"> 2026 </strong>
+            </p>
+
+            <input id="novaTemporadaNome" placeholder="Próxima (ex: 2027)" />
+
+            <button class="gold" onclick="encerrarTemporada()">
+              🏁 Encerrar e Salvar
+            </button>
+
+            <div id="listaHistorico" class="history-list"></div>
+          </section>
+        </div>
+
+        <!-- =========================  
+         BACKUP  
+    ========================== -->
+        <div id="backup" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> SEGURANÇA </span>
+
+              <h2>Backup dos Dados</h2>
+
+              <p>Exporte ou importe os dados completos do campeonato.</p>
+            </div>
+          </section>
+
+          <section class="card backup-card">
+            <div class="backup-icon">💾</div>
+
+            <div class="backup-content">
+              <span class="card-kicker"> PROTEÇÃO DOS DADOS </span>
+
+              <h2>Backup do Campeonato</h2>
+
+              <p>
+                Exporte e importe a estrutura completa das fases, equipes,
+                jogadores e informações da competição.
+              </p>
+
+              <div class="backup-actions">
+                <button class="blue" onclick="exportarDados()">
+                  💾 Exportar Backup
+                </button>
+
+                <label class="file-label">
+                  📂 Escolher arquivo
+
+                  <input type="file" id="arquivoImportar" accept=".json" />
+                </label>
+
+                <button onclick="importarDados()">Importar Backup</button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- =========================
+             CONTATO
+        ========================== -->
+        <div id="contato" class="tab-content">
+          <section class="page-heading">
+            <div>
+              <span class="section-eyebrow"> CONTATO </span>
+
+              <h2>Fale comigo</h2>
+
+              <p>Conheça meus projetos e acompanhe meu trabalho.</p>
+            </div>
+          </section>
+
+          <div class="content-grid">
+            <section class="card">
+              <div class="card-heading">
+                <div class="card-icon">📸</div>
+
+                <div>
+                  <span class="card-kicker"> REDES SOCIAIS </span>
+                  <h2>Instagram</h2>
+                </div>
+              </div>
+
+              <p>Acompanhe meus projetos e conteúdos no Instagram.</p>
+
+              <a
+                href="https://www.instagram.com/Leandromassuquetto9/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link"
+              >
+                📸 Acessar Instagram
+              </a>
+            </section>
+
+            <section class="card">
+              <div class="card-heading">
+                <div class="card-icon">💻</div>
+
+                <div>
+                  <span class="card-kicker"> PROJETO </span>
+                  <h2>GitHub</h2>
+                </div>
+              </div>
+
+              <p>Veja o projeto publicado e acompanhe sua evolução.</p>
+
+              <a
+                href="https://leandrodev7.github.io/Campeonato-Profissional-V3/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="link"
+              >
+                💻 Acessar projeto
+              </a>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      <!-- =========================  
+       RODAPÉ  
+  ========================== -->
+      <footer class="site-footer">
+        <div>
+          <strong>🏆 Campeonato Profissional</strong>
+          <span>V4</span>
+        </div>
+
+        <p>Sistema de gestão esportiva</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
