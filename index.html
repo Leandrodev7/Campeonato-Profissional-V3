@@ -8,14 +8,30 @@
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Campeonato Profissional V4</title>
+    <title>Campeonato Profissional | Gestão de campeonatos de futebol</title>
+    <meta
+      name="description"
+      content="Sistema para organizar campeonatos de futebol: cadastre times, gere rodadas e chaves, acompanhe a classificação e a artilharia."
+    />
+    <link rel="canonical" href="https://campeonatoprofissional.netlify.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Campeonato Profissional" />
+    <meta
+      property="og:description"
+      content="Organize times, rodadas, classificação e artilharia do seu campeonato."
+    />
+    <meta
+      property="og:url"
+      content="https://campeonatoprofissional.netlify.app/"
+    />
 
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="app-shell">
-      <!-- =========================  
-           CABEÇALHO PRINCIPAL  
+      <!-- =========================
+           CABEÇALHO PRINCIPAL
       ========================== -->
       <header class="site-header">
         <div class="brand-area">
@@ -37,9 +53,9 @@
         </div>
       </header>
 
-      <!-- =========================  
-       NAVEGAÇÃO  
-  ========================== -->
+      <!-- =========================
+           NAVEGAÇÃO
+      ========================== -->
       <nav class="main-navigation">
         <div class="nav-title">
           <span>MENU</span>
@@ -83,17 +99,18 @@
             <span class="nav-icon">💾</span>
             Backup
           </button>
+
+          <button class="tab-btn" onclick="mostrarAba(event, 'contato')">
+            <span class="nav-icon">📞</span>
+            Contato
+          </button>
         </div>
       </nav>
-      <button class="tab-btn" onclick="mostrarAba(event, 'contato')">
-        <span class="nav-icon">📞</span>
-        Contato
-      </button>
 
       <main class="main-content">
-        <!-- =========================  
-         DASHBOARD  
-    ========================== -->
+        <!-- =========================
+             DASHBOARD
+        ========================== -->
         <div id="dashboard" class="tab-content active">
           <section class="dashboard-hero">
             <div class="hero-copy">
@@ -179,9 +196,9 @@
           </section>
         </div>
 
-        <!-- =========================  
-         TIMES  
-    ========================== -->
+        <!-- =========================
+             TIMES
+        ========================== -->
         <div id="times" class="tab-content">
           <section class="page-heading">
             <div>
@@ -224,9 +241,9 @@
           </div>
         </div>
 
-        <!-- =========================  
-         PERFIL DO TIME  
-    ========================== -->
+        <!-- =========================
+             PERFIL DO TIME
+        ========================== -->
         <div id="perfilTime" class="tab-content">
           <section class="card profile-card">
             <button class="link" onclick="mostrarAba(event, 'times')">
@@ -237,9 +254,9 @@
           </section>
         </div>
 
-        <!-- =========================  
-         CLASSIFICAÇÃO  
-    ========================== -->
+        <!-- =========================
+             CLASSIFICAÇÃO
+        ========================== -->
         <div id="tabela" class="tab-content">
           <section class="page-heading">
             <div>
@@ -256,9 +273,9 @@
           <div id="conteudoTabelas"></div>
         </div>
 
-        <!-- =========================  
-         RODADAS E CHAVES  
-    ========================== -->
+        <!-- =========================
+             RODADAS E CHAVES
+        ========================== -->
         <div id="rodadas" class="tab-content">
           <section class="page-heading">
             <div>
@@ -335,9 +352,9 @@
           </section>
         </div>
 
-        <!-- =========================  
-         ARTILHEIROS  
-    ========================== -->
+        <!-- =========================
+             ARTILHEIROS
+        ========================== -->
         <div id="artilheiros" class="tab-content">
           <section class="page-heading">
             <div>
@@ -409,9 +426,9 @@
           </div>
         </div>
 
-        <!-- =========================  
-         TEMPORADAS  
-    ========================== -->
+        <!-- =========================
+             TEMPORADAS
+        ========================== -->
         <div id="temporadas" class="tab-content">
           <section class="page-heading">
             <div>
@@ -449,9 +466,9 @@
           </section>
         </div>
 
-        <!-- =========================  
-         BACKUP  
-    ========================== -->
+        <!-- =========================
+             BACKUP
+        ========================== -->
         <div id="backup" class="tab-content">
           <section class="page-heading">
             <div>
@@ -492,6 +509,7 @@
             </div>
           </section>
         </div>
+
         <!-- =========================
              CONTATO
         ========================== -->
@@ -554,9 +572,9 @@
         </div>
       </main>
 
-      <!-- =========================  
-       RODAPÉ  
-  ========================== -->
+      <!-- =========================
+           RODAPÉ
+      ========================== -->
       <footer class="site-footer">
         <div>
           <strong>🏆 Campeonato Profissional</strong>
