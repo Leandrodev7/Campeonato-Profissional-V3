@@ -103,6 +103,54 @@ function save() {
   enviarParaServidor();
 }
 
+/* =====================================================
+   PROTEÇÃO DOS DADOS
+   Antes de qualquer ação que apaga jogos, o sistema baixa
+   automaticamente um arquivo de backup no computador.
+   ===================================================== */
+
+function dataHoraBR() {
+  return new Date().toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
+function torneioTemResultados() {
+  return data.campeonato.fases.some(
+    (f) =>
+      (f.rodadas || []).some((r) =>
+        (r.jogos || []).some((j) => j.golsCasa !== null && j.golsFora !== null),
+      ) ||
+      (f.etapas || []).some((e) =>
+        (e.jogos || []).some(
+          (j) => !j.isBye && j.golsCasa !== null && j.golsFora !== null,
+        ),
+      ),
+  );
+}
+
+function baixarBackupAutomatico(motivo) {
+  try {
+    const carimbo = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(
+      new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      }),
+    );
+
+    a.download = `backup_automatico_${motivo}_${data.temporadaAtual}_${carimbo}.json`;
+
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  } catch (erro) {
+    console.error("Não foi possível gerar o backup automático:", erro);
+  }
+}
+
 function mostrarAba(e, id) {
   document
     .querySelectorAll(".tab-content")
@@ -186,6 +234,10 @@ function removeTeam(id) {
 
   if (!confirm(`Remover ${t.nome}? Isso vai reiniciar o campeonato atual.`)) {
     return;
+  }
+
+  if (torneioTemResultados()) {
+    baixarBackupAutomatico("antes_de_remover_time");
   }
 
   data.times.splice(index, 1);
@@ -291,10 +343,7 @@ function abrirPerfil(timeId) {
             j.golsCasa !== null ? `${j.golsCasa} x ${j.golsFora}` : "— x —";
 
           return `
-            <div
-              class="rodada"
-              style="margin:6px 0;padding:10px"
-            >
+            <div class="rodada" style="margin:6px 0;padding:10px">
               ${j.fase}
               ${j.n ? "Rod." + j.n : ""}:
               ${c.nome} ${pl} ${f.nome}
@@ -305,13 +354,7 @@ function abrirPerfil(timeId) {
     : "<p>Sem jogos registrados</p>";
 
   document.getElementById("conteudoPerfil").innerHTML = `
-    <h2
-      style="
-        text-align:center;
-        color:#22c55e;
-        margin-bottom:16px
-      "
-    >
+    <h2 style="text-align:center;color:#22c55e;margin-bottom:16px">
       ${t.nome}
     </h2>
 
@@ -321,75 +364,27 @@ function abrirPerfil(timeId) {
         : ""
     }
 
-    <p class="destaque">
-      📊 Resumo Geral na Temporada
-    </p>
+    <p class="destaque">📊 Resumo Geral na Temporada</p>
 
-    <div
-      style="
-        display:grid;
-        grid-template-columns:repeat(5,1fr);
-        gap:8px;
-        margin:12px 0
-      "
-    >
-      <div class="perfil-stat">
-        <strong>${t.pts}</strong>
-        <span>PTS</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.j}</strong>
-        <span>JOGOS</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.v}</strong>
-        <span>VITÓRIAS</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.e}</strong>
-        <span>EMPATES</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.d}</strong>
-        <span>DERROTAS</span>
-      </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0">
+      <div class="perfil-stat"><strong>${t.pts}</strong><span>PTS</span></div>
+      <div class="perfil-stat"><strong>${t.j}</strong><span>JOGOS</span></div>
+      <div class="perfil-stat"><strong>${t.v}</strong><span>VITÓRIAS</span></div>
+      <div class="perfil-stat"><strong>${t.e}</strong><span>EMPATES</span></div>
+      <div class="perfil-stat"><strong>${t.d}</strong><span>DERROTAS</span></div>
     </div>
 
-    <div
-      style="
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:8px;
-        margin:8px 0 16px
-      "
-    >
-      <div class="perfil-stat">
-        <strong>${t.gp}</strong>
-        <span>GP</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.gc}</strong>
-        <span>GC</span>
-      </div>
-
-      <div class="perfil-stat">
-        <strong>${t.sg}</strong>
-        <span>SALDO</span>
-      </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 16px">
+      <div class="perfil-stat"><strong>${t.gp}</strong><span>GP</span></div>
+      <div class="perfil-stat"><strong>${t.gc}</strong><span>GC</span></div>
+      <div class="perfil-stat"><strong>${t.sg}</strong><span>SALDO</span></div>
     </div>
 
     <p>Forma: ${forma}</p>
 
     <br>
 
-    <p class="destaque">
-      👟 Artilheiros do Time
-    </p>
+    <p class="destaque">👟 Artilheiros do Time</p>
 
     ${
       jog.length
@@ -399,9 +394,7 @@ function abrirPerfil(timeId) {
 
     <br>
 
-    <p class="destaque">
-      📋 Histórico de Jogos
-    </p>
+    <p class="destaque">📋 Histórico de Jogos</p>
 
     ${jogosHTML}
   `;
@@ -414,6 +407,16 @@ function gerarCampeonatoCompleto() {
 
   if (data.times.length < 2) {
     return alert("Cadastre pelo menos 2 times diferentes!");
+  }
+
+  if (torneioTemResultados()) {
+    const ok = confirm(
+      "Já existe um torneio com resultados lançados. Iniciar um novo vai APAGAR os jogos atuais.\n\nUm backup será baixado automaticamente. Continuar?",
+    );
+
+    if (!ok) return;
+
+    baixarBackupAutomatico("antes_de_iniciar_torneio");
   }
 
   const fmt = document.getElementById("formatoCampeonato").value;
@@ -571,6 +574,7 @@ function criarFaseGruposMisto(nomeFase, listaTimes) {
     rodadas: todasRodadas,
   };
 }
+
 function nomeEtapaPorNumeroDeJogos(n) {
   if (n === 16) return "16 avos de Final";
   if (n === 8) return "Oitavas de Final";
@@ -1110,6 +1114,16 @@ function encerrarTemporada() {
     campeao = tabela[0];
   }
 
+  if (
+    !confirm(
+      `Encerrar a temporada ${data.temporadaAtual}?\n\nCampeão: ${campeao.nome}\n\nOs jogos e a classificação ficarão guardados no histórico, e um backup será baixado automaticamente.`,
+    )
+  ) {
+    return;
+  }
+
+  baixarBackupAutomatico("antes_de_encerrar");
+
   const artilheiro = [...data.jogadores].sort((a, b) => b.gols - a.gols)[0];
 
   const ataque = [...data.times].sort((a, b) => b.gp - a.gp)[0];
@@ -1118,9 +1132,11 @@ function encerrarTemporada() {
 
   const vice = tabela.find((t) => String(t.id) !== String(campeao.id)) || null;
 
+  const copiar = (x) => JSON.parse(JSON.stringify(x));
+
   data.historico.unshift({
     temporada: data.temporadaAtual,
-    dataFim: new Date().toLocaleString(),
+    dataFim: dataHoraBR(),
 
     campeao: {
       nome: campeao.nome,
@@ -1148,22 +1164,21 @@ function encerrarTemporada() {
           gols: defesa.gc,
         }
       : null,
+
+    /* Cópia completa da temporada: classificação final, jogos e artilheiros */
+    arquivo: {
+      formato: data.campeonato.formato,
+      times: copiar(tabela),
+      fases: copiar(data.campeonato.fases),
+      jogadores: copiar(data.jogadores),
+    },
   });
 
   const nova = document.getElementById("novaTemporadaNome")?.value.trim();
 
   data.temporadaAtual = nova || (Number(data.temporadaAtual) + 1).toString();
 
-  data.times.forEach((t) => {
-    t.pts = 0;
-    t.j = 0;
-    t.v = 0;
-    t.e = 0;
-    t.d = 0;
-    t.gp = 0;
-    t.gc = 0;
-    t.sg = 0;
-  });
+  data.times = [];
 
   data.campeonato.fases = [];
   data.campeonato.faseAtualIndex = 0;
@@ -1172,6 +1187,142 @@ function encerrarTemporada() {
   save();
 
   alert("Temporada encerrada com sucesso!");
+}
+
+/* Mostra a classificação final e os jogos de uma temporada já encerrada */
+function verTemporadaArquivada(indice) {
+  const h = data.historico[indice];
+
+  if (!h || !h.arquivo) return;
+
+  const arq = h.arquivo;
+  const timesArq = Array.isArray(arq.times) ? arq.times : [];
+  const fasesArq = Array.isArray(arq.fases) ? arq.fases : [];
+  const jogadoresArq = Array.isArray(arq.jogadores) ? arq.jogadores : [];
+
+  const nomeDe = (id, alternativo) => {
+    const t = timesArq.find((x) => String(x.id) === String(id));
+    return t ? t.nome : alternativo || "A definir";
+  };
+
+  const placar = (j) =>
+    j.golsCasa === null || j.golsFora === null
+      ? "— x —"
+      : `${j.golsCasa} x ${j.golsFora}`;
+
+  const linhaJogo = (j) => `
+    <div class="jogo-info">
+      <span>${nomeDe(j.casa, j.casaPlaceholder)}</span>
+      <span class="placar">${placar(j)}</span>
+      <span>${nomeDe(j.fora, j.foraPlaceholder)}</span>
+    </div>
+  `;
+
+  const tabela = [...timesArq].sort(
+    (a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp,
+  );
+
+  const tabelaHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Time</th><th>Pts</th><th>J</th><th>V</th>
+          <th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tabela
+          .map(
+            (t, i) => `
+              <tr>
+                <td>${i + 1}</td><td>${t.nome}</td><td>${t.pts}</td>
+                <td>${t.j}</td><td>${t.v}</td><td>${t.e}</td><td>${t.d}</td>
+                <td>${t.gp}</td><td>${t.gc}</td><td>${t.sg}</td>
+              </tr>
+            `,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+  let jogosHTML = "";
+
+  fasesArq.forEach((fase) => {
+    jogosHTML += `<span class="fase-badge">${fase.nome}</span>`;
+
+    if (fase.tipo === "PONTOS_CORRIDOS") {
+      (fase.rodadas || []).forEach((r) => {
+        jogosHTML += `
+          <div class="rodada">
+            <h3>${r.grupo ? r.grupo + " - " : ""}Rodada ${r.numero}</h3>
+            ${(r.jogos || []).map(linhaJogo).join("")}
+          </div>
+        `;
+      });
+    }
+
+    if (fase.tipo === "MATA_MATA") {
+      (fase.etapas || []).forEach((etapa) => {
+        const jogos = (etapa.jogos || []).filter((j) => !j.isBye);
+
+        if (!jogos.length) return;
+
+        jogosHTML += `
+          <div class="rodada">
+            <h3>🔥 ${etapa.nome}</h3>
+            ${jogos.map(linhaJogo).join("")}
+          </div>
+        `;
+      });
+    }
+  });
+
+  const artilhariaHTML = jogadoresArq.length
+    ? [...jogadoresArq]
+        .sort((a, b) => b.gols - a.gols)
+        .map((j) => `<p>• ${j.nome} — ${j.gols} gols</p>`)
+        .join("")
+    : "<p style='color:#999'>Nenhum artilheiro registrado</p>";
+
+  let box = document.getElementById("detalheTemporada");
+
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "detalheTemporada";
+    box.style.marginTop = "20px";
+
+    const lista = document.getElementById("listaHistorico");
+
+    if (!lista) return;
+
+    lista.after(box);
+  }
+
+  box.innerHTML = `
+    <div class="card">
+      <h3 class="destaque">🏆 Temporada ${h.temporada}: detalhes</h3>
+
+      <button onclick="fecharDetalheTemporada()">Fechar detalhes</button>
+
+      <h4 class="destaque" style="margin-top:16px">Classificação final</h4>
+      ${tabelaHTML}
+
+      <h4 class="destaque" style="margin-top:16px">Artilharia</h4>
+      ${artilhariaHTML}
+
+      <h4 class="destaque" style="margin-top:16px">Jogos</h4>
+      ${jogosHTML || "<p style='color:#999'>Sem jogos arquivados</p>"}
+    </div>
+  `;
+
+  box.scrollIntoView({ behavior: "smooth" });
+}
+
+function fecharDetalheTemporada() {
+  const box = document.getElementById("detalheTemporada");
+
+  if (box) box.innerHTML = "";
 }
 
 function exportarDados() {
@@ -1188,31 +1339,81 @@ function exportarDados() {
   URL.revokeObjectURL(a.href);
 }
 
-function importarDados() {
+async function importarDados() {
   const arquivo = document.getElementById("arquivoImportar").files[0];
 
   if (!arquivo) {
-    return alert("Escolha um arquivo");
+    alert("Escolha um arquivo");
+    return;
+  }
+
+  if (!ehAdmin) {
+    alert("Entre como administrador antes de importar.");
+    return;
+  }
+
+  if (!supa || !servidorCarregado) {
+    alert("O servidor ainda não está pronto. Aguarde e tente novamente.");
+    return;
   }
 
   const leitor = new FileReader();
 
-  leitor.onload = (e) => {
+  leitor.onload = async (e) => {
+    const dadosAnteriores = data;
+
     try {
       const novo = JSON.parse(e.target.result);
 
-      if (!confirm("Substituir todos os dados do sistema?")) {
+      if (!novo || typeof novo !== "object" || Array.isArray(novo)) {
+        throw new Error("O arquivo não contém dados válidos.");
+      }
+
+      if (!confirm("Substituir todos os dados do sistema pelo backup?")) {
         return;
       }
 
+      baixarBackupAutomatico("antes_de_importar");
+
       data = novo;
       validarEstrutura();
-      save();
 
-      alert("Importado com sucesso!");
-    } catch {
-      alert("Arquivo JSON inválido.");
+      const { data: linhas, error } = await supa
+        .from(TABELA)
+        .update({
+          dados: data,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", LINHA_ID)
+        .select("id");
+
+      if (error) {
+        throw error;
+      }
+
+      if (!linhas || linhas.length === 0) {
+        throw new Error("O servidor não confirmou a atualização.");
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      servidorCarregado = true;
+      render();
+      atualizarBarra();
+
+      alert("Backup importado e salvo no servidor!");
+    } catch (erro) {
+      data = dadosAnteriores;
+      console.error("Erro na importação:", erro);
+
+      alert(
+        "A importação não foi concluída.\n\n" +
+          (erro.message || "Verifique o console para mais detalhes."),
+      );
     }
+  };
+
+  leitor.onerror = () => {
+    alert("Não foi possível ler o arquivo.");
   };
 
   leitor.readAsText(arquivo);
@@ -1221,6 +1422,10 @@ function importarDados() {
 function comecarNovo() {
   if (!confirm("Apagar todos os dados e começar do zero?")) {
     return;
+  }
+
+  if (data.times.length || data.historico.length || torneioTemResultados()) {
+    baixarBackupAutomatico("antes_de_apagar_tudo");
   }
 
   localStorage.removeItem(STORAGE_KEY);
@@ -1323,7 +1528,8 @@ function render() {
 
   if (elGols) elGols.textContent = gols;
 
-  if (elLider) elLider.textContent = tabela[0]?.nome || "—";
+  if (elLider)
+    elLider.textContent = realizados > 0 && tabela[0] ? tabela[0].nome : "-";
 
   if (elArt) {
     elArt.textContent = artilheiros[0]
@@ -1337,17 +1543,10 @@ function render() {
     grid.innerHTML = tabela
       .map(
         (t, i) => `
-          <div
-            class="time-card"
-            onclick="abrirPerfil('${t.id}')"
-          >
-            <div class="pos">
-              ${i + 1}º
-            </div>
+          <div class="time-card" onclick="abrirPerfil('${t.id}')">
+            <div class="pos">${realizados > 0 ? i + 1 + "º" : "-"}</div>
 
-            <div class="nome">
-              ${t.nome}
-            </div>
+            <div class="nome">${t.nome}</div>
 
             ${
               t.cidade
@@ -1355,29 +1554,16 @@ function render() {
                 : ""
             }
 
-            <div class="pts">
-              ${t.pts} pts • ${t.j} jogos
-            </div>
+            <div class="pts">${t.pts} pts • ${t.j} jogos</div>
 
-            <div
-              style="
-                font-size:13px;
-                color:#9ca3af;
-                margin-top:4px
-              "
-            >
-              V:${t.v}
-              E:${t.e}
-              D:${t.d}
+            <div style="font-size:13px;color:#9ca3af;margin-top:4px">
+              V:${t.v} E:${t.e} D:${t.d}
             </div>
 
             <button
               class="del"
               style="margin-top:12px"
-              onclick="
-                event.stopPropagation();
-                removeTeam('${t.id}')
-              "
+              onclick="event.stopPropagation(); removeTeam('${t.id}')"
             >
               Excluir
             </button>
@@ -1408,21 +1594,18 @@ function render() {
         const time = data.times.find((t) => String(t.id) === String(j.timeId));
 
         return `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${j.nome}</td>
-              <td>${time?.nome || "-"}</td>
-              <td>${j.gols}</td>
-              <td>
-                <button
-                  class="del"
-                  onclick="delJogador(${j.id})"
-                >
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          `;
+          <tr>
+            <td>${i + 1}</td>
+            <td>${j.nome}</td>
+            <td>${time?.nome || "-"}</td>
+            <td>${j.gols}</td>
+            <td>
+              <button class="del" onclick="delJogador(${j.id})">
+                Excluir
+              </button>
+            </td>
+          </tr>
+        `;
       })
       .join("");
   }
@@ -1433,21 +1616,13 @@ function render() {
     historico.innerHTML = data.historico.length
       ? data.historico
           .map(
-            (h) => `
+            (h, i) => `
               <div class="historico-item">
-                <h4 class="destaque">
-                  🏆 Temporada ${h.temporada}
-                </h4>
+                <h4 class="destaque">🏆 Temporada ${h.temporada}</h4>
 
-                <p>
-                  Campeão:
-                  ${h.campeao?.nome || "-"}
-                </p>
+                <p>Campeão: ${h.campeao?.nome || "-"}</p>
 
-                <p>
-                  Vice:
-                  ${h.vice?.nome || "-"}
-                </p>
+                <p>Vice: ${h.vice?.nome || "-"}</p>
 
                 <p>
                   Artilheiro:
@@ -1459,22 +1634,27 @@ function render() {
                 </p>
 
                 <p>
-                  Ataque:
-                  ${h.melhorAtaque?.nome || "-"}
+                  Ataque: ${h.melhorAtaque?.nome || "-"}
                   |
-                  Defesa:
-                  ${h.melhorDefesa?.nome || "-"}
+                  Defesa: ${h.melhorDefesa?.nome || "-"}
                 </p>
 
-                <small>
-                  ${h.dataFim || ""}
-                </small>
+                <small>${h.dataFim || ""}</small>
+
+                ${
+                  h.arquivo
+                    ? `<br><button onclick="verTemporadaArquivada(${i})">Ver classificação e jogos</button>`
+                    : `<br><small style="color:#8b949e">Só o resumo foi guardado (encerrada antes do arquivo completo).</small>`
+                }
               </div>
             `,
           )
           .join("")
       : "<p style='color:#999'>Nenhuma temporada encerrada</p>";
   }
+
+  /* Evita mostrar detalhes de uma temporada que mudou de posição na lista */
+  fecharDetalheTemporada();
 }
 
 function renderTabelasAba() {
@@ -1506,9 +1686,7 @@ function renderTabelasAba() {
 
         html += `
           <div class="card">
-            <span class="fase-badge">
-              ${fase.nome} — ${grupo}
-            </span>
+            <span class="fase-badge">${fase.nome} — ${grupo}</span>
 
             <table>
               <thead>
@@ -1568,18 +1746,11 @@ function renderTabelasAba() {
 
     html += `
       <div class="card">
-        <span class="fase-badge">
-          ${fase.nome}
-        </span>
+        <span class="fase-badge">${fase.nome}</span>
 
         ${
           concluida && tabela[0]
-            ? `
-              <div class="chave-campeao">
-                🏆 CAMPEÃO:
-                ${tabela[0].nome}
-              </div>
-            `
+            ? `<div class="chave-campeao">🏆 CAMPEÃO: ${tabela[0].nome}</div>`
             : ""
         }
 
@@ -1628,11 +1799,7 @@ function renderTabelasAba() {
                     <td>${t.gp}</td>
                     <td>${t.gc}</td>
                     <td>${t.sg}</td>
-                    <td>
-                      <div class="forma">
-                        ${forma}
-                      </div>
-                    </td>
+                    <td><div class="forma">${forma}</div></td>
                   </tr>
                 `;
               })
@@ -1656,10 +1823,7 @@ function renderTabelasAba() {
       if (campeao) {
         html += `
           <div class="card">
-            <div class="chave-campeao">
-              🏆 CAMPEÃO:
-              ${campeao.nome}
-            </div>
+            <div class="chave-campeao">🏆 CAMPEÃO: ${campeao.nome}</div>
           </div>
         `;
       }
@@ -1688,21 +1852,19 @@ function renderRodadasAba() {
 
   data.campeonato.fases.forEach((fase, fIdx) => {
     html += `
-        <div style="margin-bottom:24px">
-          <span class="fase-badge">
-            ${fase.nome}
-          </span>
-      `;
+      <div style="margin-bottom:24px">
+        <span class="fase-badge">${fase.nome}</span>
+    `;
 
     if (fase.tipo === "PONTOS_CORRIDOS") {
       fase.rodadas.forEach((rodada, rIdx) => {
         html += `
-              <div class="rodada">
-                <h3>
-                  ${rodada.grupo ? rodada.grupo + " - " : ""}
-                  Rodada ${rodada.numero}
-                </h3>
-            `;
+          <div class="rodada">
+            <h3>
+              ${rodada.grupo ? rodada.grupo + " - " : ""}
+              Rodada ${rodada.numero}
+            </h3>
+        `;
 
         rodada.jogos.forEach((jogo, jIdx) => {
           const casa = data.times.find(
@@ -1716,36 +1878,26 @@ function renderRodadasAba() {
           if (!casa || !fora) return;
 
           html += `
-                  <div class="jogo-info">
-                    <span>
-                      ${casa.nome}
-                    </span>
+            <div class="jogo-info">
+              <span>${casa.nome}</span>
 
-                    <span class="placar">
-                      ${
-                        jogo.golsCasa === null
-                          ? "— x —"
-                          : jogo.golsCasa + " x " + jogo.golsFora
-                      }
-                    </span>
+              <span class="placar">
+                ${
+                  jogo.golsCasa === null
+                    ? "— x —"
+                    : jogo.golsCasa + " x " + jogo.golsFora
+                }
+              </span>
 
-                    <span>
-                      ${fora.nome}
-                    </span>
+              <span>${fora.nome}</span>
 
-                    <button
-                      onclick="
-                        definirJogoPontosCorridos(
-                          ${fIdx},
-                          ${rIdx},
-                          ${jIdx}
-                        )
-                      "
-                    >
-                      Editar
-                    </button>
-                  </div>
-                `;
+              <button
+                onclick="definirJogoPontosCorridos(${fIdx}, ${rIdx}, ${jIdx})"
+              >
+                Editar
+              </button>
+            </div>
+          `;
         });
 
         html += `</div>`;
@@ -1753,19 +1905,14 @@ function renderRodadasAba() {
 
       if (fase.grupos && !fase.concluida) {
         html += `
-            <button
-              class="gold"
-              style="
-                width:100%;
-                padding:14px;
-                margin-top:10px
-              "
-              onclick="promoverGruposParaMataMata()"
-            >
-              🚀 Promover Classificados
-              dos Grupos para o Mata-Mata
-            </button>
-          `;
+          <button
+            class="gold"
+            style="width:100%;padding:14px;margin-top:10px"
+            onclick="promoverGruposParaMataMata()"
+          >
+            🚀 Promover Classificados dos Grupos para o Mata-Mata
+          </button>
+        `;
       }
     }
 
@@ -1778,22 +1925,9 @@ function renderRodadasAba() {
         if (!jogos.length) return;
 
         html += `
-              <div
-                class="rodada"
-                style="
-                  border-left:
-                    4px solid
-                    var(--primary)
-                "
-              >
-                <h3
-                  style="
-                    color:var(--primary)
-                  "
-                >
-                  🔥 ${etapa.nome}
-                </h3>
-            `;
+          <div class="rodada" style="border-left:4px solid var(--primary)">
+            <h3 style="color:var(--primary)">🔥 ${etapa.nome}</h3>
+        `;
 
         jogos.forEach((jogo) => {
           const indice = etapa.jogos.findIndex((x) => x.id === jogo.id);
@@ -1813,52 +1947,39 @@ function renderRodadasAba() {
           const pronto = jogo.casa !== null && jogo.fora !== null;
 
           html += `
-                <div class="jogo-info">
-                  <span>
-                    ${nomeCasa}
-                  </span>
+            <div class="jogo-info">
+              <span>${nomeCasa}</span>
 
-                  <span class="placar">
-                    ${
-                      jogo.golsCasa === null
-                        ? "— x —"
-                        : jogo.golsCasa + " x " + jogo.golsFora
-                    }
-                  </span>
+              <span class="placar">
+                ${
+                  jogo.golsCasa === null
+                    ? "— x —"
+                    : jogo.golsCasa + " x " + jogo.golsFora
+                }
+              </span>
 
-                  <span>
-                    ${nomeFora}
-                  </span>
+              <span>${nomeFora}</span>
 
-                  ${
-                    pronto
-                      ? `
-                        <button
-                          onclick="
-                            definirJogoMataMata(
-                              ${fIdx},
-                              ${eIdx},
-                              ${indice}
-                            )
-                          "
-                        >
-                          ${jogo.golsCasa === null ? "Definir" : "Editar"}
-                        </button>
-                      `
-                      : `
-                        <button
-                          style="
-                            opacity:.4;
-                            cursor:not-allowed
-                          "
-                          disabled
-                        >
-                          Aguardando
-                        </button>
-                      `
-                  }
-                </div>
-              `;
+              ${
+                pronto
+                  ? `
+                    <button
+                      onclick="definirJogoMataMata(${fIdx}, ${eIdx}, ${indice})"
+                    >
+                      ${jogo.golsCasa === null ? "Definir" : "Editar"}
+                    </button>
+                  `
+                  : `
+                    <button
+                      style="opacity:.4;cursor:not-allowed"
+                      disabled
+                    >
+                      Aguardando
+                    </button>
+                  `
+              }
+            </div>
+          `;
         });
 
         html += `</div>`;
@@ -1873,46 +1994,39 @@ function renderRodadasAba() {
 
             if (campeao) {
               html += `
-                    <div
-                      style="
-                        text-align:center;
-                        margin-top:20px;
-                        padding:24px;
-                        background:
-                          linear-gradient(
-                            135deg,
-                            #facc15,
-                            #f59e0b
-                          );
-                        border-radius:12px
-                      "
-                    >
-                      <div style="font-size:48px">
-                        🏆
-                      </div>
+                <div
+                  style="
+                    text-align:center;
+                    margin-top:20px;
+                    padding:24px;
+                    background:linear-gradient(135deg, #facc15, #f59e0b);
+                    border-radius:12px
+                  "
+                >
+                  <div style="font-size:48px">🏆</div>
 
-                      <div
-                        style="
-                          font-size:14px;
-                          color:#78350f;
-                          font-weight:bold;
-                          letter-spacing:1px
-                        "
-                      >
-                        CAMPEÃO
-                      </div>
+                  <div
+                    style="
+                      font-size:14px;
+                      color:#78350f;
+                      font-weight:bold;
+                      letter-spacing:1px
+                    "
+                  >
+                    CAMPEÃO
+                  </div>
 
-                      <div
-                        style="
-                          font-size:28px;
-                          color:#1a1a1a;
-                          font-weight:900
-                        "
-                      >
-                        ${campeao.nome}
-                      </div>
-                    </div>
-                  `;
+                  <div
+                    style="
+                      font-size:28px;
+                      color:#1a1a1a;
+                      font-weight:900
+                    "
+                  >
+                    ${campeao.nome}
+                  </div>
+                </div>
+              `;
             }
           }
         }
